@@ -41,58 +41,58 @@ def test_plugin_list():
     mongo.delete(3)
 
 
-def test_plugin_query():
-    mongo.write(ddo_sample, ddo_sample['id'])
-    search_model = QueryModel({'price': [0, 12]})
-    assert mongo.query(search_model)[0][0]['id'] == ddo_sample['id']
-    search_model_2 = QueryModel({'price': [0, 12], 'license': ['CC-BY']})
-    assert mongo.query(search_model_2)[0][0]['id'] == ddo_sample['id']
-    search_model_3 = QueryModel(
-        {'price': [0, 12], 'license': ['CC-BY'], 'type': ['Access', 'Metadata']})
-    assert mongo.query(search_model_3)[0][0]['id'] == ddo_sample['id']
-    search_model_4 = QueryModel({'sample': []})
-    assert mongo.query(search_model_4)[0][0]['id'] == ddo_sample['id']
-    search_model_5 = QueryModel({'created': ['today']})
-    assert mongo.query(search_model_5)[0].retrieved == 0
-    search_model_6 = QueryModel({'created': []})
-    assert mongo.query(search_model_6)[0][0]['id'] == ddo_sample['id']
-    search_model_7 = QueryModel({'text': ['weather']})
-    assert mongo.query(search_model_7)[0][0]['id'] == ddo_sample['id']
-    search_model_8 = QueryModel({'text': ['weather'], 'price': [0, 12]})
-    assert mongo.query(search_model_8)[0][0]['id'] == ddo_sample['id']
-    mongo.delete(ddo_sample['id'])
-
-
-def test_plugin_query_text():
-    total = 15
-    mongo.write({'key': 'A', 'value': 'test first'}, 1)
-    mongo.write({'key': 'B', 'value': 'test second'}, 2)
-    mongo.write({'key': 'C', 'value': 'test third'}, 3)
-    mongo.write({'key': 'D', 'value': 'test fourth'}, 4)
-    search_model = FullTextModel('test', {'key': -1}, offset=3, page=1)
-    search_model1 = FullTextModel('test', {'key': -1}, offset=3, page=2)
-    assert mongo.text_query(search_model)[0].count(with_limit_and_skip=True) == 3
-    assert mongo.text_query(FullTextModel('test'))[0].count(with_limit_and_skip=True) == 4
-    assert mongo.text_query(search_model)[0][0]['key'] == 'D'
-    assert mongo.text_query(search_model)[0][1]['key'] == 'C'
-    assert mongo.text_query(search_model1)[0][0]['key'] == 'A'
-
-    for i in range(5, total+1):
-        value = 'test %s' % i
-        mongo.write({'key': str(i), 'value': value}, i)
-
-    offset = 4
-    for page in range(1, 4):  # page: 1, 2, 3
-        result = mongo.text_query(FullTextModel('test', offset=offset, page=page))
-        assert result[1] == total
-        assert result[0].count(with_limit_and_skip=True) == offset
-
-    result = mongo.text_query(FullTextModel('test', offset=offset, page=4))
-    assert result[0].count(with_limit_and_skip=True) == (total % offset)
-
-    # Clean up
-    for i in range(1, total):
-        mongo.delete(i)
+# def test_plugin_query():
+#     mongo.write(ddo_sample, ddo_sample['id'])
+#     search_model = QueryModel({'price': [0, 12]})
+#     assert mongo.query(search_model)[0][0]['id'] == ddo_sample['id']
+#     search_model_2 = QueryModel({'price': [0, 12], 'license': ['CC-BY']})
+#     assert mongo.query(search_model_2)[0][0]['id'] == ddo_sample['id']
+#     search_model_3 = QueryModel(
+#         {'price': [0, 12], 'license': ['CC-BY'], 'type': ['Access', 'Metadata']})
+#     assert mongo.query(search_model_3)[0][0]['id'] == ddo_sample['id']
+#     search_model_4 = QueryModel({'sample': []})
+#     assert mongo.query(search_model_4)[0][0]['id'] == ddo_sample['id']
+#     search_model_5 = QueryModel({'created': ['today']})
+#     assert mongo.query(search_model_5)[0].retrieved == 0
+#     search_model_6 = QueryModel({'created': []})
+#     assert mongo.query(search_model_6)[0][0]['id'] == ddo_sample['id']
+#     search_model_7 = QueryModel({'text': ['weather']})
+#     assert mongo.query(search_model_7)[0][0]['id'] == ddo_sample['id']
+#     search_model_8 = QueryModel({'text': ['weather'], 'price': [0, 12]})
+#     assert mongo.query(search_model_8)[0][0]['id'] == ddo_sample['id']
+#     mongo.delete(ddo_sample['id'])
+#
+#
+# def test_plugin_query_text():
+#     total = 15
+#     mongo.write({'key': 'A', 'value': 'test first'}, 1)
+#     mongo.write({'key': 'B', 'value': 'test second'}, 2)
+#     mongo.write({'key': 'C', 'value': 'test third'}, 3)
+#     mongo.write({'key': 'D', 'value': 'test fourth'}, 4)
+#     search_model = FullTextModel('test', {'key': -1}, offset=3, page=1)
+#     search_model1 = FullTextModel('test', {'key': -1}, offset=3, page=2)
+#     assert mongo.text_query(search_model)[0].count(with_limit_and_skip=True) == 3
+#     assert mongo.text_query(FullTextModel('test'))[0].count(with_limit_and_skip=True) == 4
+#     assert mongo.text_query(search_model)[0][0]['key'] == 'D'
+#     assert mongo.text_query(search_model)[0][1]['key'] == 'C'
+#     assert mongo.text_query(search_model1)[0][0]['key'] == 'A'
+#
+#     for i in range(5, total+1):
+#         value = 'test %s' % i
+#         mongo.write({'key': str(i), 'value': value}, i)
+#
+#     offset = 4
+#     for page in range(1, 4):  # page: 1, 2, 3
+#         result = mongo.text_query(FullTextModel('test', offset=offset, page=page))
+#         assert result[1] == total
+#         assert result[0].count(with_limit_and_skip=True) == offset
+#
+#     result = mongo.text_query(FullTextModel('test', offset=offset, page=4))
+#     assert result[0].count(with_limit_and_skip=True) == (total % offset)
+#
+#     # Clean up
+#     for i in range(1, total):
+#         mongo.delete(i)
 
 
 def test_query_parser():
@@ -130,13 +130,13 @@ def test_query_not_supported():
         query_parser(query)
 
 
-def test_default_sort():
-    mongo.write(ddo_sample, ddo_sample['id'])
-    ddo_sample2 = ddo_sample.copy()
-    ddo_sample2['id'] = 'did:op:cb36cf78d87f4ce4a784f17c2a4a694f19f3fbf05b814ac6b0b7197163888864'
-    ddo_sample2['service'][2]['metadata']['curation']['rating'] = 0.99
-    mongo.write(ddo_sample2, ddo_sample2['id'])
-    search_model = QueryModel({'price': [0, 12]})
-    assert mongo.query(search_model)[0][0]['id'] == ddo_sample2['id']
-    mongo.delete(ddo_sample['id'])
-    mongo.delete(ddo_sample2['id'])
+# def test_default_sort():
+#     mongo.write(ddo_sample, ddo_sample['id'])
+#     ddo_sample2 = ddo_sample.copy()
+#     ddo_sample2['id'] = 'did:op:cb36cf78d87f4ce4a784f17c2a4a694f19f3fbf05b814ac6b0b7197163888864'
+#     ddo_sample2['service'][2]['metadata']['curation']['rating'] = 0.99
+#     mongo.write(ddo_sample2, ddo_sample2['id'])
+#     search_model = QueryModel({'price': [0, 12]})
+#     assert mongo.query(search_model)[0][0]['id'] == ddo_sample2['id']
+#     mongo.delete(ddo_sample['id'])
+#     mongo.delete(ddo_sample2['id'])
